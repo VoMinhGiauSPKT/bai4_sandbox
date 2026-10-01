@@ -21,8 +21,22 @@ public class VNPayService {
         long totalVND = Math.round(totalUSD * VNPayConfig.USD_TO_VND_RATE);
         long vnpAmount = totalVND * 100L; // VNPAY yêu cầu nhân 100
 
-        String returnUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
-                + request.getContextPath() + "/vnpay_return";
+        String returnUrl = System.getenv("VNPAY_RETURN_URL");
+        if (returnUrl == null || returnUrl.trim().isEmpty()) {
+            String scheme = request.getHeader("X-Forwarded-Proto");
+            if (scheme == null || scheme.trim().isEmpty()) {
+                scheme = request.getScheme();
+            }
+            String host = request.getHeader("X-Forwarded-Host");
+            if (host == null || host.trim().isEmpty()) {
+                host = request.getServerName();
+                int port = request.getServerPort();
+                if ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)) {
+                    host += ":" + port;
+                }
+            }
+            returnUrl = scheme + "://" + host + request.getContextPath() + "/vnpay_return";
+        }
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", VNPayConfig.vnp_Version);
