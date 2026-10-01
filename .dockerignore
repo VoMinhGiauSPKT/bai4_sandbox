@@ -1,0 +1,6 @@
+target/
+.git/
+.gitignore
+*.war
+.nb-configuration.xml
+nb-configuration.xml
